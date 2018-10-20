@@ -1,0 +1,34 @@
+---
+title: "Readme"
+author: "Me"
+date: "10/19/2018"
+output: md_document
+---
+
+```{r setup, include=FALSE}
+library(prepr)
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Preparation R
+
+This package is used to temporarily relieve swelling, burning, pain, and itching caused by
+data preparation.
+
+```{r}
+x <- rnorm(1000)
+
+minmax <- prep_center(method="min") %|>% prep_scale(method="range")
+normalize <- prep_center(method="mean") %|>% prep_scale(method="sd")
+
+hist(predict(minmax, x))
+hist(predict(normalize, x))
+
+## compose further
+combo <- minmax %|>% normalize
+
+hist(predict(combo, x))
+```
+
+
+
