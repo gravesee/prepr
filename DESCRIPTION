@@ -10,8 +10,7 @@ License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
 Collate:
-    'preparator.R'
-    'compose.R'
-    'prepfuns.R'
-    'util.R'
+    'Transform.R'
+    'Pipeline.R'
+    'Scalers.R'
 RoxygenNote: 6.0.1

@@ -2,27 +2,46 @@ Preparation R
 -------------
 
 This package is used to temporarily relieve swelling, burning, pain, and
-itching caused by data preparation.
+itching caused by data preparation. Heavily influenced by sklearn
+preprocessing module. As such it aims to implement the Transformer API
+and allow for pipelines that can be saved and applied to new datasets.
 
-    x <- rnorm(1000)
-    ## add some NAs
-    x[sample(length(x), 250)] <- NA
+It will eventually include methods for outputting to PMML or json to
+assist with productionalizing data preparation steps. It currently only
+works with single variables, but once the patterns are formalized it
+will extend to data.frames.
 
-    minmax <- prep_center(method="min") %|>% prep_scale(method="range")
-    normalize <- prep_center(method="mean") %|>% prep_scale(method="sd")
-    impute <- prep_impute(value=-3)
+    # Dummy data
+    z1 <- rpois(1e5, 4)
 
-    hist(predict(minmax, x))
+    ## create a standard normalization scaler
+    scaler <- StandardScaler()
+
+    scaler$fit(z1)
+    hist(scaler$transform(z1))
 
 ![](readme_files/figure-markdown_strict/unnamed-chunk-1-1.png)
 
-    hist(predict(normalize, x))
+    ## verify that the inverse transform is equal to the original data
+    all.equal(scaler$inverse_transform(scaler$transform(z1)), z1)
 
-![](readme_files/figure-markdown_strict/unnamed-chunk-1-2.png)
+    ## [1] TRUE
 
-    ## compose further
-    combo <- minmax %|>% impute
+### Piplines
 
-    hist(predict(combo, x))
+Pipelines simply chain together transformers in a list. They implement
+the Transformer API as well and support the same methods:
 
-![](readme_files/figure-markdown_strict/unnamed-chunk-1-3.png)
+    ## chain together in a pipeline
+    p <- pipeline(
+      StandardScaler(),
+      MinMaxScaler(feature_range=c(-1, 1))
+    )
+
+    z2 <- p$fit_transform(z1)
+    z3 <- p$inverse_transform(z2)
+
+    ## verify the pipeline can be undone
+    all.equal(z1, z3)
+
+    ## [1] TRUE
