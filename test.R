@@ -3,15 +3,14 @@ z1 <- rpois(1e5, 4)
 
 x <- mtcars
 
-mm <- MinMaxScaler(feature_range=c(-1,1))
+mm <- MinMaxScaler(feature_range=c(-5,5))
 res <- mm$fit_transform(mtcars)
 mm$inverse_transform(res)
 
 all.equal(mtcars, mm$inverse_transform(res))
 
 scaler <- StandardScaler()
-
-scaler$fit(x)
+scaler$fit(mtcars$mpg)
 
 
 scaler$transform(z)

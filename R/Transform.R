@@ -7,7 +7,9 @@ setRefClass(
       isfit <<- FALSE
       callSuper(...)
     },
-    fit = function(data) stop("Must implement"),
+    fit = function(data) {
+      isfit <<- TRUE
+    },
     transform = function(data) stop("Must implement"),
     fit_transform = function(data) {
       fit(data)

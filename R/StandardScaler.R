@@ -12,9 +12,7 @@ standard_scale_mean_.numeric <- function(data, with_mean, with_std) {
 
 standard_scale_mean_.data.frame <- function(data, with_mean, with_std) {
   res <- mapply(standard_scale_mean_, data, with_mean, with_std, SIMPLIFY = FALSE)
-  list(
-    scale_ = sapply(res, "[[", "scale_"),
-    mean_ = sapply(res, "[[", "mean_"))
+  unpack_(res, c("scale_", "mean_"))
 }
 
 ##---- Transform
@@ -25,7 +23,7 @@ standard_transform <- function(data, with_mean, with_std) UseMethod("standard_tr
 StandardScaler <-setRefClass(
   "StandardScaler",
   contains = "Transformer",
-  fields = c(with_mean="logical", with_std="logical"),
+  fields = c(with_mean="logical", with_std="logical", mean_="numeric", scale_="numeric"),
   methods = list(
     initialize = function(with_mean=TRUE, with_std=TRUE, ...) {
       with_mean <<- with_mean
@@ -35,10 +33,7 @@ StandardScaler <-setRefClass(
 
     fit = function(data) {
       isfit <<- TRUE
-      env <- environment(fun = .self$fit)
-      res <- standard_scale_mean_(data, with_mean, with_std)
-      env$scale_ <- res$scale_
-      env$mean_ <- res$mean_
+      env <- list2env(standard_scale_mean_(data, with_mean, with_std), .self@.xData)
     },
     transform = function(data) {
       stopifnot(isfit)
