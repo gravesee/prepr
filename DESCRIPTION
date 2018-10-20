@@ -12,7 +12,6 @@ LazyData: true
 Collate:
     'preparator.R'
     'compose.R'
-    'hello.R'
     'prepfuns.R'
     'util.R'
 RoxygenNote: 6.0.1

@@ -10,7 +10,7 @@ setMethod("prep_scale", "missing", function(x, ...)
 
 #' @export
 setMethod("prep_scale", "vector", function(x, ..., method) {
-  div <- switch(method, sd = sd(x), range = diff(range(x, na.rm=T)))
+  div <- switch(method, sd = sd(x, na.rm=T), range = diff(range(x, na.rm=T)))
   fun <- function(x, ...) x / div
   preparator(fun=fun, data=fun(x), extra=list(divisor=div))
 })
@@ -35,16 +35,17 @@ setMethod("prep_center", "vector", function(x, ..., method) {
 setGeneric("prep_impute", function(x, ...) standardGeneric("prep_impute"))
 
 #' @export
-setMethod("prep_impute", "missing", function(x, ...) partial("prep_impute", ...))
+setMethod("prep_impute", "missing", function(x, ...)
+  preparator(fun=partial("prep_impute", ...), call=match.call()))
 
 #' @export
-setMethod("prep_impute", "vector", function(x, ..., method) {
-  val <- do.call(method, list(x, na.rm=TRUE))
+setMethod("prep_impute", "vector", function(x, ..., method, value=NULL) {
+  val <- if (!is.null(value)) value else  do.call(method, list(x, na.rm=TRUE))
   fun <- function(x, ...) {
     x[is.na(x)] <- val
     x
   }
-  preparator(fun=fun, data=fun(x), extra=list(center=cen), call=match.call())
+  preparator(fun=fun, data=fun(x), extra=list(value=val), call=match.call())
 })
 
 
