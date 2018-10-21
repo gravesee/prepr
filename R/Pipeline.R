@@ -6,16 +6,24 @@ Pipeline <- setRefClass(
   fields = c(transformers="list"),
   methods = list(
     initialize = function(transformers, ...) {
-      transformers <<- transformers
       callSuper(...)
+      transformers <<- transformers
+
+      ## apply column filter to all transformers
+      if (!identical(cols, character(0))) {
+        transformers <<- lapply(transformers, function(tf) {
+          tf$cols <- cols
+          tf
+        })
+      }
     })
 )
 
 #' @export
-pipeline <- function(...) {
+pipeline <- function(..., cols=character()) {
   tfs <- list(...)
   stopifnot(all(sapply(tfs, is, "Transformer")))
-  Pipeline(transformers=tfs)
+  Pipeline(transformers=tfs, cols=cols)
 }
 
 #' @export

@@ -18,7 +18,7 @@ new datasets.
 
 It will eventually include methods for outputting to PMML or json to assist with productionalizing data preparation steps.
 
-```{r}
+```{r Fit & Transform}
 
 ## create a standard normalization scaler
 s <- StandardScaler()
@@ -37,23 +37,44 @@ all.equal(s$inverse_transform(s$transform(mtcars)), mtcars)
 
 ```
 
+## Specify Subset of Columns
+
+All transformers take a `cols` argument. It can be a character vector of column name which limits the transformer operations to just those columns. Optionally, "factor" or "numeric" can be specified to limit opertions to just columns of those types. Most transformers have a default value for the `cols` argument that makes sense for the operation.
+
+```{r Filter Columns}
+
+mm <- MinMaxScaler(feature_range=c(-1, 1), cols=c("disp", "hp", "wt"))
+z <- mm$fit_transform(mtcars)
+
+## only specified columns are transformed
+sapply(z, range)
+```
+
 ### Piplines
 
-Pipelines simply chain together transformers in a list. They implement the Transformer
-API as well and support the same methods:
+Pipelines simply chain together transformers in a list. They implement the Transformer API as well and support the same methods. Columns can also have an optional `cols` argument that will limit all pipeline operations to the columns specified.
 
-```{r}
+```{r Pipelines}
 ## chain together in a pipeline
 p <- pipeline(
   StandardScaler(),
-  MinMaxScaler(feature_range=c(-1, 1))
-)
+  MinMaxScaler(feature_range=c(-1, 1)))
 
 z <- p$fit_transform(mtcars)
 mtcars2 <- p$inverse_transform(z)
 
 ## verify the pipeline can be undone
 all.equal(mtcars, mtcars2)
+
+## same pipeline with restricted columns
+p <- pipeline(
+  StandardScaler(),
+  MinMaxScaler(feature_range=c(-1, 1)),
+  cols = c("disp", "mpg", "hp"))
+
+sapply(p$fit_transform(mtcars), range)
+
+
 ```
 
 

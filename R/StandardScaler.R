@@ -9,6 +9,7 @@ StandardScaler <-setRefClass(
     initialize = function(with_mean=TRUE, with_std=TRUE, ...) {
       with_mean <<- with_mean
       with_std <<- with_std
+      cols <<- "numeric"
       callSuper(...)
     })
 )
@@ -19,12 +20,12 @@ StandardScaler_fit_ <- function(x, with_mean, with_std) {
        mean_  = if (with_mean) mean(x, na.rm=T) else 0)
 }
 
-setMethod("fit_", c("StandardScaler", "numeric"), function(.self, x, ...) {
+setMethod("fit_", c("StandardScaler", "numeric"), function(.self, x, f, ...) {
   list2env(StandardScaler_fit_(x, .self$with_mean, .self$with_std), .self@.xData)
 })
 
-setMethod("fit_", c("StandardScaler", "data.frame"), function(.self, x, ...) {
-  res <- mapply(StandardScaler_fit_, x, .self$with_mean, .self$with_std, SIMPLIFY = FALSE)
+setMethod("fit_", c("StandardScaler", "data.frame"), function(.self, x, f, ...) {
+  res <- mapply(StandardScaler_fit_, x[f], .self$with_mean, .self$with_std, SIMPLIFY = FALSE)
   list2env(unpack_(res, c("scale_", "mean_")), .self@.xData)
 })
 
@@ -33,13 +34,13 @@ StandardScaler_transform_ <- function(x, with_mean, with_std, mean_, scale_) {
     (if (with_std) scale_ else 1)
 }
 
-setMethod("transform_", c("StandardScaler", "numeric"), function(.self, x) {
+setMethod("transform_", c("StandardScaler", "numeric"), function(.self, x, f) {
   StandardScaler_transform_(x, .self$with_mean, .self$with_std, .self$mean_, .self$scale_)
 })
 
 #' @export
-setMethod("transform_", c("StandardScaler", "data.frame"), function(.self, x) {
-  x[] <- mapply(StandardScaler_transform_, x,
+setMethod("transform_", c("StandardScaler", "data.frame"), function(.self, x, f) {
+  x[f] <- mapply(StandardScaler_transform_, x[f],
                 .self$with_mean,
                 .self$with_std,
                 .self$mean_,
@@ -53,14 +54,14 @@ StandardScaler_inverse_transform_ <- function(x, scale_, mean_, with_mean, with_
 }
 
 #' @export
-setMethod("inverse_transform_", c("StandardScaler", "numeric"), function(.self, x) {
+setMethod("inverse_transform_", c("StandardScaler", "numeric"), function(.self, x, f) {
   StandardScaler_inverse_transform_(x, .self$scale_, .self$mean_,
                                     .self$with_mean, .self$with_std)
 })
 
 #' @export
-setMethod("inverse_transform_", c("StandardScaler", "data.frame"), function(.self, x) {
-  x[] <- mapply(StandardScaler_inverse_transform_, x,
+setMethod("inverse_transform_", c("StandardScaler", "data.frame"), function(.self, x, f) {
+  x[f] <- mapply(StandardScaler_inverse_transform_, x[f],
                 .self$scale_,
                 .self$mean_,
                 .self$with_mean,
