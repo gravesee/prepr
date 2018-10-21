@@ -10,20 +10,20 @@ Pipeline <- setRefClass(
       callSuper(...)
     },
     fit = function(data) {
-      isfit <<- TRUE
+      callSuper()
       for (i in seq_along(transformers)) {
         data <- transformers[[i]]$fit_transform(data)
       }
     },
     transform = function(data) {
-      stopifnot(isfit)
+      callSuper()
       for (i in seq_along(transformers)) {
         data <- transformers[[i]]$transform(data)
       }
       data
     },
     inverse_transform = function(data) {
-      stopifnot(isfit)
+      callSuper()
       for (i in rev(seq_along(transformers))) {
         data <- transformers[[i]]$inverse_transform(data)
       }

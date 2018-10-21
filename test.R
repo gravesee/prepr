@@ -9,19 +9,23 @@ mm$inverse_transform(res)
 
 all.equal(mtcars, mm$inverse_transform(res))
 
-scaler <- StandardScaler()
-scaler$fit(mtcars$mpg)
+ss <- StandardScaler()
+ss$fit(mtcars)
+res <- ss$fit_transform(mtcars)
+ss$inverse_transform(res)
+all.equal(mtcars, ss$inverse_transform(res))
 
+scaler$transform(mtcars$mpg)
 
-scaler$transform(z)
+z <- mtcars$mpg
 all.equal(scaler$inverse_transform(scaler$transform(z)), z)
 
-## chain together in a pipeline
 p <- pipeline(
-  StandardScaler(),
-  MinMaxScaler(feature_range=c(-1, 1))
+  MinMaxScaler(feature_range=c(-1, 1)),
+  StandardScaler()
 )
 
+all.equal(, mtcars)
 
 z2 <- p$fit_transform(z1)
 z3 <- p$inverse_transform(z2)

@@ -1,3 +1,5 @@
+#' @include util.R
+
 setRefClass(
   "Transformer",
   contains = "VIRTUAL",
@@ -10,9 +12,10 @@ setRefClass(
     fit = function(data) {
       isfit <<- TRUE
     },
-    transform = function(data) stop("Must implement"),
+    transform = function(data) stopifnot(isfit),
     fit_transform = function(data) {
       fit(data)
       transform(data)
-    }
+    },
+    inverse_transform = function(data) stopifnot(isfit)
   ))

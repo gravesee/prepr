@@ -1,15 +1,16 @@
 Package: prepr
 Type: Package
-Title: What the Package Does (Title Case)
-Version: 0.1.0
-Author: Who wrote it
-Maintainer: The package maintainer <yourself@somewhere.net>
-Description: More about what it does (maybe more than one line)
-    Use four spaces when indenting paragraphs within the Description.
+Title: Data Preparation Pipeline and Manifest
+Version: 0.0.1
+Author: Eric E. Graves
+Maintainer: Eric E. Graves <eric.emerson.graves@gmail.com>
+Description: Specify data transformation workflows and record the steps
+    for use on new datasets.
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
 Collate:
+    'util.R'
     'Transform.R'
     'MinMaxScaler.R'
     'Pipeline.R'
