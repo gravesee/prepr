@@ -1,4 +1,4 @@
-#' @include util.R
+#' @include util.R generics.R
 
 setRefClass(
   "Transformer",
@@ -9,13 +9,20 @@ setRefClass(
       isfit <<- FALSE
       callSuper(...)
     },
-    fit = function(data) {
+    fit = function(x) {
+      fit_(.self, x)
       isfit <<- TRUE
     },
-    transform = function(data) stopifnot(isfit),
-    fit_transform = function(data) {
-      fit(data)
-      transform(data)
+    transform = function(x) {
+      stopifnot(isfit)
+      transform_(.self, x)
     },
-    inverse_transform = function(data) stopifnot(isfit)
+    fit_transform = function(x) {
+      fit_(.self, x)
+      transform_(.self, x)
+    },
+    inverse_transform = function(x) {
+      stopifnot(isfit)
+      inverse_transform_(.self, x)
+    }
   ))
