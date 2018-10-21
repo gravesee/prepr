@@ -15,8 +15,8 @@ StandardScaler <-setRefClass(
 
 ##---- Helpers
 StandardScaler_fit_ <- function(x, with_mean, with_std) {
-  list(scale_ = if (with_std) sd(x) else var(x),
-       mean_  = if (with_mean) mean(x) else 0)
+  list(scale_ = if (with_std) sd(x, na.rm=T) else var(x, na.rm=T),
+       mean_  = if (with_mean) mean(x, na.rm=T) else 0)
 }
 
 setMethod("fit_", c("StandardScaler", "numeric"), function(.self, x, ...) {

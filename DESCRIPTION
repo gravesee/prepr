@@ -15,5 +15,6 @@ Collate:
     'Transform.R'
     'MinMaxScaler.R'
     'Pipeline.R'
+    'StandardImputer.R'
     'StandardScaler.R'
 RoxygenNote: 6.0.1

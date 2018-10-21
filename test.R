@@ -22,10 +22,13 @@ all.equal(scaler$inverse_transform(scaler$transform(z)), z)
 
 p <- pipeline(
   MinMaxScaler(feature_range=c(-1, 1)),
-  StandardScaler()
+  StandardScaler(),
+  StandardImputer(value=100)
 )
 
-all.equal(, mtcars)
+mtcars$mpg[1:10] <- NA
+
+p$fit_transform(mtcars)
 
 z2 <- p$fit_transform(z1)
 z3 <- p$inverse_transform(z2)

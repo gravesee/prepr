@@ -1,5 +1,6 @@
 #' @include util.R generics.R
 
+#' @exportClass Transformer
 setRefClass(
   "Transformer",
   contains = "VIRTUAL",
