@@ -1,7 +1,5 @@
 #' @include Transform.R
 
-
-
 #' @exportClass MinMaxScaler
 #' @export MinMaxScaler
 MinMaxScaler <-setRefClass(
@@ -12,19 +10,60 @@ MinMaxScaler <-setRefClass(
     initialize = function(feature_range, ...) {
       feature_range <<- feature_range
       callSuper(...)
-    },
-
-    fit = function(x) {
-      browser()
-      UseMethod("fit")
-    },
-
-    fit.numeric = function(x) {
-      min_max <- range(x, na.rm=TRUE)
-      data_range <- diff(min_max)
-      scale_ <<- diff(feature_range) / data_range
-      min_ <<- feature_range[[1]] - min_max[[1]] * scale_
     })
 )
 
+check_feature_range_ <- function(fr, x) {
+  if (is.numeric(fr)) rep(list(fr), length(x)) else fr
+}
 
+##----- Calculate scale and min
+MinMaxScaler_fit_ <- function(x, feature_range) {
+  min_max <- range(x, na.rm=TRUE)
+  data_range <- diff(min_max)
+  scale <- diff(feature_range) / data_range
+
+  list(
+    scale_ = scale,
+    min_ = feature_range[[1]] - min_max[[1]] * scale)
+}
+
+#' @export
+setMethod("fit_", c("MinMaxScaler", "numeric"), function(.self, x, ...) {
+  list2env(MinMaxScaler_fit_(x, .self$feature_range), .self@.xData)
+})
+
+#' @export
+setMethod("fit_", c("MinMaxScaler", "data.frame"), function(.self, x, ...) {
+  res <- mapply(MinMaxScaler_fit_, x,
+                check_feature_range_(.self$feature_range, x), SIMPLIFY = F)
+
+  list2env(unpack_(res, c("scale_", "min_")), .self@.xData)
+})
+
+MinMaxScaler_transform_ <- function(x, scale_, min_) (x * scale_) + min_
+
+#' @export
+setMethod("transform_", c("MinMaxScaler", "numeric"), function(.self, x) {
+  MinMaxScaler_transform_(x, .self$scale_, .self$min_)
+})
+
+#' @export
+setMethod("transform_", c("MinMaxScaler", "data.frame"), function(.self, x) {
+  x[] <- mapply(MinMaxScaler_transform_, x, .self$scale_, .self$min_, SIMPLIFY = F)
+  x
+})
+
+MinMaxScaler_inverse_transform_ <- function(x, scale_, min_) (x - min_) / scale_
+
+#' @export
+setMethod("inverse_transform_", c("MinMaxScaler", "numeric"), function(.self, x) {
+  MinMaxScaler_inverse_transform_(x, .self$scale_, .self$min_)
+})
+
+#' @export
+setMethod("inverse_transform_", c("MinMaxScaler", "data.frame"), function(.self, x) {
+  x[] <- mapply(MinMaxScaler_inverse_transform_, x,
+                .self$scale_, .self$min_, SIMPLIFY = FALSE)
+  x
+})

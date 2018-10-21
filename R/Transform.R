@@ -18,8 +18,8 @@ setRefClass(
       transform_(.self, x)
     },
     fit_transform = function(x) {
-      fit_(.self, x)
-      transform_(.self, x)
+      fit(x)
+      transform(x)
     },
     inverse_transform = function(x) {
       stopifnot(isfit)

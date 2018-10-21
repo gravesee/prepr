@@ -1,80 +1,5 @@
 #'@include Transform.R
 
-##---- Helpers
-
-#' @export
-standard_scale_mean_ <- function(data, with_mean, with_std) {
-  UseMethod("standard_scale_mean_")
-}
-
-#' @export
-standard_scale_mean_.numeric <- function(data, with_mean, with_std) {
-  list(
-    scale_ = if (with_std) sd(data) else var(data),
-    mean_  = if (with_mean) mean(data) else 0)
-}
-
-#' @export
-standard_scale_mean_.data.frame <- function(data, with_mean, with_std) {
-  res <- mapply(standard_scale_mean_, data, with_mean, with_std, SIMPLIFY = FALSE)
-  unpack_(res, c("scale_", "mean_"))
-}
-
-##---- Transform
-
-#' @export
-standard_transform_ <- function(data, scale_, mean_, with_mean, with_std) {
-  UseMethod("standard_transform_")
-}
-
-#' @export
-standard_transform_.numeric <- function(data, scale_, mean_, with_mean, with_std) {
-  if (with_mean) data <- data - mean_
-  if (with_std) data <- data / scale_
-  data
-}
-
-#' @export
-standard_transform_.data.frame <- function(data, scale_, mean_, with_mean, with_std) {
-  data[] <- mapply(
-    standard_transform_,
-    data,
-    as.list(scale_),
-    as.list(mean_),
-    MoreArgs = list(with_mean=with_mean, with_std=with_std),
-    SIMPLIFY = FALSE)
-
-  data
-}
-
-##--- Inverse transform
-
-#' @export
-standard_inverse_transform_ <- function(data, scale_, mean_, with_mean, with_std) {
-  UseMethod("standard_inverse_transform_")
-}
-
-#' @export
-standard_inverse_transform_.numeric <- function(data, scale_, mean_, with_mean, with_std) {
-  if (with_std) data <- data * scale_
-  if (with_mean) data <- data + mean_
-  data
-}
-
-#' @export
-standard_inverse_transform_.data.frame <- function(data, scale_, mean_, with_mean, with_std) {
-  data[] <- mapply(
-    standard_inverse_transform_,
-    data,
-    as.list(scale_),
-    as.list(mean_),
-    MoreArgs = list(with_mean=with_mean, with_std=with_std),
-    SIMPLIFY = FALSE)
-
-  data
-}
-
-
 #' @export StandardScaler
 StandardScaler <-setRefClass(
   "StandardScaler",
@@ -85,19 +10,60 @@ StandardScaler <-setRefClass(
       with_mean <<- with_mean
       with_std <<- with_std
       callSuper(...)
-    },
-
-    fit = function(data) {
-      callSuper()
-      env <- list2env(standard_scale_mean_(data, with_mean, with_std), .self@.xData)
-    },
-    transform = function(data) {
-      callSuper()
-      standard_transform_(data, scale_, mean_, with_mean, with_std)
-    },
-    inverse_transform = function(data) {
-      callSuper()
-      standard_inverse_transform_(data, scale_, mean_, with_mean, with_std)
-    }
-  )
+    })
 )
+
+##---- Helpers
+StandardScaler_fit_ <- function(x, with_mean, with_std) {
+  list(scale_ = if (with_std) sd(x) else var(x),
+       mean_  = if (with_mean) mean(x) else 0)
+}
+
+setMethod("fit_", c("StandardScaler", "numeric"), function(.self, x, ...) {
+  list2env(StandardScaler_fit_(x, .self$with_mean, .self$with_std), .self@.xData)
+})
+
+setMethod("fit_", c("StandardScaler", "data.frame"), function(.self, x, ...) {
+  res <- mapply(StandardScaler_fit_, x, .self$with_mean, .self$with_std, SIMPLIFY = FALSE)
+  list2env(unpack_(res, c("scale_", "mean_")), .self@.xData)
+})
+
+StandardScaler_transform_ <- function(x, with_mean, with_std, mean_, scale_) {
+  (x - if (with_mean) mean_ else 0) /
+    (if (with_std) scale_ else 1)
+}
+
+setMethod("transform_", c("StandardScaler", "numeric"), function(.self, x) {
+  StandardScaler_transform_(x, .self$with_mean, .self$with_std, .self$mean_, .self$scale_)
+})
+
+#' @export
+setMethod("transform_", c("StandardScaler", "data.frame"), function(.self, x) {
+  x[] <- mapply(StandardScaler_transform_, x,
+                .self$with_mean,
+                .self$with_std,
+                .self$mean_,
+                .self$scale_, SIMPLIFY = F)
+  x
+})
+
+##--- Inverse transform
+StandardScaler_inverse_transform_ <- function(x, scale_, mean_, with_mean, with_std) {
+  x * (if (with_std) scale_ else 1) + (if (with_mean) mean_ else 0)
+}
+
+#' @export
+setMethod("inverse_transform_", c("StandardScaler", "numeric"), function(.self, x) {
+  StandardScaler_inverse_transform_(x, .self$scale_, .self$mean_,
+                                    .self$with_mean, .self$with_std)
+})
+
+#' @export
+setMethod("inverse_transform_", c("StandardScaler", "data.frame"), function(.self, x) {
+  x[] <- mapply(StandardScaler_inverse_transform_, x,
+                .self$scale_,
+                .self$mean_,
+                .self$with_mean,
+                .self$with_std, SIMPLIFY = FALSE)
+  x
+})
