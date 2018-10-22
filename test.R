@@ -1,6 +1,24 @@
 ## Create a
 z1 <- rpois(1e5, 4)
 
+titanic <- read.csv("~/Documents/bigdata.csvh", nrows=1e6)
+titanic$Pclass <- factor(titanic$Pclass)
+
+s <- sample(nrow(titanic), nrow(titanic)/2)
+
+p <- pipeline(
+  StandardScaler(),
+  StandardImputer(value=-99),
+  MinMaxScaler(feature_range = c(-1, 1)),
+  FactorImputer(method="woe")
+)
+
+p$fit(titanic[s, -1], y=titanic$Survived[s])
+z <- p$transform(titanic[-1])
+dev <- z[s,]
+val <- z[-s,]
+
+
 x <- mtcars
 
 mm <- MinMaxScaler(feature_range=c(-5,5))

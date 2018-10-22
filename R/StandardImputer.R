@@ -23,40 +23,30 @@ StandardImputer <- setRefClass(
       method <<- method
       value <<- value
       cols <<- cols
+      allowed_types_ <<- c("integer", "numeric")
       callSuper(...)
     })
 )
 
-##---- Helpers
-StandardImputer_fit_ <- function(x, method, value) {
-  if (!identical(value, NA_real_)) value else do.call(method, list(x, na.rm=TRUE))
-}
-
-#' @export
-setMethod("fit_", c("StandardImputer", "numeric"), function(.self, x, f, ...) {
-  .self$value_ <- StandardImputer_fit_(x, .self$method, .self$value)
-
-})
-
 #' @export
 setMethod("fit_", c("StandardImputer", "data.frame"), function(.self, x, f, ...) {
-  .self$value_ <- mapply(StandardImputer_fit_, x[f],
-                         .self$method, .self$value, SIMPLIFY = TRUE)
+  .self$value_ <- mapply(
+    function(x, method, value) {
+      if (!identical(value, NA_real_))
+        value
+      else
+        do.call(method, list(x, na.rm=TRUE))
+  }, x[f], .self$method, .self$value, SIMPLIFY = TRUE)
 })
 
-StandardImputer_transform_ <- function(x, value_) {
-  x[is.na(x)] <- value_
-  x
-}
-
-#' @export
-setMethod("transform_", c("StandardImputer", "numeric"), function(.self, x, f) {
-  StandardImputer_transform_(x, .self$value_)
-})
 
 #' @export
 setMethod("transform_", c("StandardImputer", "data.frame"), function(.self, x, f) {
-  x[f] <- mapply(StandardImputer_transform_, x[f], .self$value_, SIMPLIFY = F)
+  x[f] <- mapply(
+    function(x, value) {
+      x[is.na(x)] <- value
+      x
+    }, x[f], .self$value_, SIMPLIFY = FALSE)
   x
 })
 
