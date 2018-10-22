@@ -16,15 +16,91 @@ assist with productionalizing data preparation steps.
     oh$fit(titanic)
 
     ## transform each column of data.frame 
-    head(oh$transform(head(titanic)))
+    knitr::kable(head(oh$transform(head(titanic))))
 
-    ##   Survived Age SibSp Parch    Fare Embarked Sex=male Pclass=1 Pclass=3
-    ## 1        0  22     1     0  7.2500        S        1        0        1
-    ## 2        1  38     1     0 71.2833        C        0        1        0
-    ## 3        1  26     0     0  7.9250        S        0        0        1
-    ## 4        1  35     1     0 53.1000        S        0        1        0
-    ## 5        0  35     0     0  8.0500        S        1        0        1
-    ## 6        0  NA     0     0  8.4583        Q        1        0        1
+<table>
+<thead>
+<tr class="header">
+<th align="right">Survived</th>
+<th align="right">Age</th>
+<th align="right">SibSp</th>
+<th align="right">Parch</th>
+<th align="right">Fare</th>
+<th align="left">Embarked</th>
+<th align="right">Sex=male</th>
+<th align="right">Pclass=1</th>
+<th align="right">Pclass=3</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="right">0</td>
+<td align="right">22</td>
+<td align="right">1</td>
+<td align="right">0</td>
+<td align="right">7.2500</td>
+<td align="left">S</td>
+<td align="right">1</td>
+<td align="right">0</td>
+<td align="right">1</td>
+</tr>
+<tr class="even">
+<td align="right">1</td>
+<td align="right">38</td>
+<td align="right">1</td>
+<td align="right">0</td>
+<td align="right">71.2833</td>
+<td align="left">C</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">0</td>
+</tr>
+<tr class="odd">
+<td align="right">1</td>
+<td align="right">26</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">7.9250</td>
+<td align="left">S</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">1</td>
+</tr>
+<tr class="even">
+<td align="right">1</td>
+<td align="right">35</td>
+<td align="right">1</td>
+<td align="right">0</td>
+<td align="right">53.1000</td>
+<td align="left">S</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">0</td>
+</tr>
+<tr class="odd">
+<td align="right">0</td>
+<td align="right">35</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">8.0500</td>
+<td align="left">S</td>
+<td align="right">1</td>
+<td align="right">0</td>
+<td align="right">1</td>
+</tr>
+<tr class="even">
+<td align="right">0</td>
+<td align="right">NA</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">8.4583</td>
+<td align="left">Q</td>
+<td align="right">1</td>
+<td align="right">0</td>
+<td align="right">1</td>
+</tr>
+</tbody>
+</table>
 
 Specify Subset of Columns
 -------------------------
@@ -40,11 +116,53 @@ operation.
     z <- mm$fit_transform(mtcars)
 
     ## only specified columns are transformed
-    sapply(z, range)
+    knitr::kable(sapply(z, range))
 
-    ##       mpg cyl disp hp drat wt qsec vs am gear carb
-    ## [1,] 10.4   4   -1 -1 2.76 -1 14.5  0  0    3    1
-    ## [2,] 33.9   8    1  1 4.93  1 22.9  1  1    5    8
+<table>
+<thead>
+<tr class="header">
+<th align="right">mpg</th>
+<th align="right">cyl</th>
+<th align="right">disp</th>
+<th align="right">hp</th>
+<th align="right">drat</th>
+<th align="right">wt</th>
+<th align="right">qsec</th>
+<th align="right">vs</th>
+<th align="right">am</th>
+<th align="right">gear</th>
+<th align="right">carb</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="right">10.4</td>
+<td align="right">4</td>
+<td align="right">-1</td>
+<td align="right">-1</td>
+<td align="right">2.76</td>
+<td align="right">-1</td>
+<td align="right">14.5</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">3</td>
+<td align="right">1</td>
+</tr>
+<tr class="even">
+<td align="right">33.9</td>
+<td align="right">8</td>
+<td align="right">1</td>
+<td align="right">1</td>
+<td align="right">4.93</td>
+<td align="right">1</td>
+<td align="right">22.9</td>
+<td align="right">1</td>
+<td align="right">1</td>
+<td align="right">5</td>
+<td align="right">8</td>
+</tr>
+</tbody>
+</table>
 
 ### Pipelines
 
@@ -62,22 +180,98 @@ operations to the columns specified.
 
     z <- p$fit_transform(titanic[-1])
 
-    head(z)
+    knitr::kable(head(z))
 
-    ##           Age SibSp Parch       Fare Sex=male Pclass=1 Pclass=3 Embarked=C
-    ## 1 -0.45765268 -0.75    -1 -0.9716979        1        0        1          0
-    ## 2 -0.05554159 -0.75    -1 -0.7217285        0        1        0          1
-    ## 3 -0.35712491 -1.00    -1 -0.9690629        0        0        1          0
-    ## 4 -0.13093742 -0.75    -1 -0.7927114        0        1        0          0
-    ## 5 -0.13093742 -1.00    -1 -0.9685749        1        0        1          0
-    ## 6 -0.30686102 -1.00    -1 -0.9669810        1        0        1          0
-    ##   Embarked=Q Embarked=S
-    ## 1          0          1
-    ## 2          0          0
-    ## 3          0          1
-    ## 4          0          1
-    ## 5          0          1
-    ## 6          1          0
+<table>
+<thead>
+<tr class="header">
+<th align="right">Age</th>
+<th align="right">SibSp</th>
+<th align="right">Parch</th>
+<th align="right">Fare</th>
+<th align="right">Sex=male</th>
+<th align="right">Pclass=1</th>
+<th align="right">Pclass=3</th>
+<th align="right">Embarked=C</th>
+<th align="right">Embarked=Q</th>
+<th align="right">Embarked=S</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="right">-0.4576527</td>
+<td align="right">-0.75</td>
+<td align="right">-1</td>
+<td align="right">-0.9716979</td>
+<td align="right">1</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">1</td>
+</tr>
+<tr class="even">
+<td align="right">-0.0555416</td>
+<td align="right">-0.75</td>
+<td align="right">-1</td>
+<td align="right">-0.7217285</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">0</td>
+<td align="right">0</td>
+</tr>
+<tr class="odd">
+<td align="right">-0.3571249</td>
+<td align="right">-1.00</td>
+<td align="right">-1</td>
+<td align="right">-0.9690629</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">1</td>
+</tr>
+<tr class="even">
+<td align="right">-0.1309374</td>
+<td align="right">-0.75</td>
+<td align="right">-1</td>
+<td align="right">-0.7927114</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">1</td>
+</tr>
+<tr class="odd">
+<td align="right">-0.1309374</td>
+<td align="right">-1.00</td>
+<td align="right">-1</td>
+<td align="right">-0.9685749</td>
+<td align="right">1</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">1</td>
+</tr>
+<tr class="even">
+<td align="right">-0.3068610</td>
+<td align="right">-1.00</td>
+<td align="right">-1</td>
+<td align="right">-0.9669810</td>
+<td align="right">1</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">0</td>
+</tr>
+</tbody>
+</table>
 
 Note that the order of the pipeline transformers is important. If you
 pass numeric transformers after onehot encoders for example, the onehot
