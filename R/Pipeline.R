@@ -16,7 +16,18 @@ Pipeline <- setRefClass(
           tf
         })
       }
-    })
+    },
+    show = function(s) {
+      callSuper(s="")
+      for (tf in transformers) {
+        cat("\n")
+        tf$show(s="  ")
+      }
+      
+    }
+    
+    
+    )
 )
 
 #' @export

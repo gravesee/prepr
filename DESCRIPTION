@@ -9,12 +9,13 @@ Description: Specify data transformation workflows and record the steps
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
-Collate:
+Collate: 
     'generics.R'
     'util.R'
     'Transform.R'
     'FactorImputer.R'
     'MinMaxScaler.R'
+    'OnehotEncoder.R'
     'Pipeline.R'
     'StandardImputer.R'
     'StandardScaler.R'

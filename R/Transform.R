@@ -11,29 +11,20 @@ setRefClass(
       callSuper(...)
     },
     filter = function(x) {
-      ## return subset of columns based on cols argument
-      if (identical(cols, character()))
-        TRUE
-      else if (length(cols) > 1)
-        names(x) %in% cols
-      else
-        switch(
-          cols,
-          factor = vapply(x, is.factor, TRUE),
-          numeric = vapply(x, is.numeric, TRUE),
-          TRUE)
+      ## set column types on fit
+      cols <<- filter_cols_(x, cols)
     },
     fit = function(x, ...) {
-      f <- filter(x)
-      if (!any(f)) return(x)
-      checktypes(x, f, allowed_types_, .self)
-      fit_(.self, x, f=f, ...)
+      filter(x) 
+      if (identical(length(cols), 0L)) return(x)
+      checktypes(x, cols, allowed_types_, .self)
+      fit_(.self, x, f=cols, ...)
       isfit <<- TRUE
     },
     transform = function(x) {
       stopifnot(isfit)
       checktypes(x, filter(x), allowed_types_, .self)
-      transform_(.self, x, f=filter(x))
+      transform_(.self, x, f=cols)
     },
     fit_transform = function(x, ...) {
       fit(x, ...)
@@ -42,6 +33,10 @@ setRefClass(
     inverse_transform = function(x) {
       stopifnot(isfit)
       checktypes(x, filter(x), allowed_types_, .self)
-      inverse_transform_(.self, x, f=filter(x))
+      inverse_transform_(.self, x, f=cols)
+    },
+    show = function(s="") {
+      cat(sprintf("%s%s", s, .self$getRefClass()@className))
+      cat(sprintf("\n%scols: %s", extend_(s), trunc_(cols)))
     }
   ))

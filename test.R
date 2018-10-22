@@ -1,20 +1,30 @@
 ## Create a
-z1 <- rpois(1e5, 4)
+data(titanic, package="onyx")
 
-titanic <- read.csv("~/Documents/bigdata.csvh", nrows=1e6)
-titanic$Pclass <- factor(titanic$Pclass)
+oh <- OnehotEncoder(levels=list(Sex=c("male"), Pclass=c("1", "3")))
+oh$fit(titanic)
+head(oh$transform(titanic))
+
 
 s <- sample(nrow(titanic), nrow(titanic)/2)
 
 p <- pipeline(
   StandardScaler(),
-  StandardImputer(value=-99),
+  StandardImputer(method="median"),
   MinMaxScaler(feature_range = c(-1, 1)),
-  FactorImputer(method="woe")
+  OnehotEncoder(levels=list(Sex="male"), keep=TRUE),
+  FactorImputer(method="mean", cols=c("sex", "Embarked", "Pclass"))
 )
 
-p$fit(titanic[s, -1], y=titanic$Survived[s])
+## Fix reporting of column errors -- requested columns not found in x
+
+
+p$fit(titanic[-1], y=titanic$Survived)
+
+
 z <- p$transform(titanic[-1])
+
+
 dev <- z[s,]
 val <- z[-s,]
 

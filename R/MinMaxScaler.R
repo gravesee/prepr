@@ -23,7 +23,7 @@ minmax_fit_ <- function(x, fr) {
 
 #' @export
 setMethod("fit_", c("MinMaxScaler", "data.frame"), function(.self, x, f, ...) {
-  fr <- repvec_(.self$feature_range, sum(f))
+  fr <- repvec_(.self$feature_range, length(f))
   res <- mapply(minmax_fit_, x[f], fr, SIMPLIFY = F)
   res <- unpack_(res, "scale", "min")
 

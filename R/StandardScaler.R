@@ -14,6 +14,12 @@ StandardScaler <-setRefClass(
       cols <<- "numeric"
       allowed_types_ <<- c("integer", "numeric")
       callSuper(...)
+    },
+    show = function(s) {
+      callSuper(s)
+      if (isfit)
+        cat(sprintf("\n%swith_mean: %s, with_std: %s", extend_(s), with_mean, with_std))
+      
     })
 )
 

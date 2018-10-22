@@ -2,6 +2,7 @@
 
 export(FactorImputer)
 export(MinMaxScaler)
+export(OnehotEncoder)
 export(StandardImputer)
 export(StandardScaler)
 export(fit_)

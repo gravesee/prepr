@@ -11,10 +11,10 @@ FactorImputer <- setRefClass(
   contains = "Transformer",
   fields = c(values="vector", method="character", values_="vector"),
   methods = list(
-    initialize = function(values=values, method="mean", y=y, ...) {
+    initialize = function(values=values, method="mean", y=y, cols="factor", ...) {
       if(!missing(values)) stopifnot(!is.null(names(values)))
       method <<- method
-      cols <<- "factor"
+      cols <<- cols
       allowed_types_ <<- "factor"
       callSuper(...)
     })
