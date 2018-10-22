@@ -16,9 +16,10 @@ assist with productionalizing data preparation steps.
     oh$fit(titanic)
 
     ## transform each column of data.frame 
-    knitr::kable(head(oh$transform(head(titanic))))
+    knitr::kable(head(oh$transform(head(titanic))), caption = "Transformed Data")
 
 <table>
+<caption>Transformed Data</caption>
 <thead>
 <tr class="header">
 <th align="right">Survived</th>
@@ -116,9 +117,10 @@ operation.
     z <- mm$fit_transform(mtcars)
 
     ## only specified columns are transformed
-    knitr::kable(sapply(z, range))
+    knitr::kable(sapply(z, range), caption="Ranges of Columns")
 
 <table>
+<caption>Ranges of Columns</caption>
 <thead>
 <tr class="header">
 <th align="right">mpg</th>
@@ -180,9 +182,10 @@ operations to the columns specified.
 
     z <- p$fit_transform(titanic[-1])
 
-    knitr::kable(head(z))
+    knitr::kable(head(z), caption="Pipeline Output")
 
 <table>
+<caption>Pipeline Output</caption>
 <thead>
 <tr class="header">
 <th align="right">Age</th>
