@@ -27,9 +27,9 @@ pipeline <- function(..., cols=character()) {
 }
 
 #' @export
-setMethod("fit_", c("Pipeline"), function(.self, x) {
+setMethod("fit_", c("Pipeline"), function(.self, x, ...) {
   for (i in seq_along(.self$transformers)) {
-    x <- .self$transformers[[i]]$fit_transform(x)
+    x <- .self$transformers[[i]]$fit_transform(x, ...)
   }
 })
 

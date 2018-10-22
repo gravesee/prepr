@@ -1,52 +1,50 @@
 #'@include Transform.R
 
+woe <- function(x, y, eps = 1e-5) {
+  pt <- prop.table(table(x, factor(y, 0:1)) + eps, margin = 2L)
+  log(pt[,2] / pt[,1])
+}
+
 #' @export FactorImputer
 FactorImputer <- setRefClass(
-  "ListImputer",
+  "FactorImputer",
   contains = "Transformer",
-  fields = c(values="vector", method="character", y="vector", values_="vector"),
+  fields = c(values="vector", method="character", values_="vector"),
   methods = list(
-    initialize = function(values=values, method=method, y=y, ...) {
-      if(!missing(method) && missing(y)) stop("If method used, must provide y")
+    initialize = function(values=values, method="mean", y=y, ...) {
       if(!missing(values)) stopifnot(!is.null(names(values)))
+      method <<- method
+      cols <<- "factor"
+      allowed_types_ <<- "factor"
       callSuper(...)
     })
 )
 
 ##---- Helpers
-FactorImputer_fit_ <- function(x, method, value, y) {
-  # if (!is.null(value)) value else tapply(y, x, method
+
+FactorImputer_fit_ <- function(x, method, values, y){
+  if (!is.null(values))
+    value
+  else
+    switch(
+      method,
+      woe = woe(x, y),
+      tapply(y, x, method))
 }
 
-#' #' @export
-#' setMethod("fit_", c("StandardImputer", "factor"), function(.self, x, ...) {
-#'   .self$value_ <- StandardImputer_fit_(x, .self$method, .self$value)
-#'
-#' })
-#'
-#' #' @export
-#' setMethod("fit_", c("StandardImputer", "data.frame"), function(.self, x, ...) {
-#'   .self$value_ <- mapply(StandardImputer_fit_, x,
-#'                          .self$method, .self$value, SIMPLIFY = TRUE)
-#' })
-#'
-#' StandardImputer_transform_ <- function(x, value_) {
-#'   x[is.na(x)] <- value_
-#'   x
-#' }
-#'
-#' #' @export
-#' setMethod("transform_", c("StandardImputer", "numeric"), function(.self, x) {
-#'   StandardImputer_transform_(x, .self$value_)
-#' })
-#'
-#' #' @export
-#' setMethod("transform_", c("StandardImputer", "data.frame"), function(.self, x) {
-#'   x[] <- mapply(StandardImputer_transform_, x, .self$value_, SIMPLIFY = F)
-#'   x
-#' })
-#'
-#' #' @export
-#' setMethod("inverse_transform_", c("StandardImputer"), function(.self, x) {
-#'   stop("Inverse not valid -- StandardImputer")
-#' })
+#' @export
+setMethod("fit_", c("FactorImputer", "data.frame"), function(.self, x, f, ..., y) {
+  .self$values_ <- lapply(x[,f,drop=F], FactorImputer_fit_, .self$method, .self$values, y)
+})
+
+
+#' @export
+setMethod("transform_", c("FactorImputer", "data.frame"), function(.self, x, f, ..., y) {
+  x[f] <- mapply(function(z, v) v[z], x[f], .self$values_, SIMPLIFY=F)
+  x
+})
+
+#' @export
+setMethod("inverse_transform_", c("FactorImputer"), function(.self, x) {
+  stop("Inverse not valid -- FactorImputer")
+})
