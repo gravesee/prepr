@@ -5,13 +5,10 @@
 MinMaxScaler <-setRefClass(
   "MinMaxScaler",
   contains = "Transformer",
-  fields = c(feature_range = "numeric", scale_="numeric", min_="numeric"),
+  fields = c(min = "numeric", max = "numeric", scale_="numeric", min_="numeric"),
   methods = list(
-    initialize = function(feature_range, ...) {
-      feature_range <<- feature_range
-      cols <<- "numeric"
-      allowed_types_ <<- c("integer", "numeric")
-      callSuper(...)
+    initialize = function(cols="numeric", ...) {
+      callSuper(cols=cols, ...)
     })
 )
 
@@ -23,7 +20,7 @@ minmax_fit_ <- function(x, fr) {
 
 #' @export
 setMethod("fit_", c("MinMaxScaler", "data.frame"), function(.self, x, f, ...) {
-  fr <- repvec_(.self$feature_range, length(f))
+  fr <- repvec_(c(.self$min, .self$max), length(f))
   res <- mapply(minmax_fit_, x[f], fr, SIMPLIFY = F)
   res <- unpack_(res, "scale", "min")
 
@@ -34,7 +31,13 @@ setMethod("fit_", c("MinMaxScaler", "data.frame"), function(.self, x, f, ...) {
 minmax_tf_ <- function(x, scale_, min_) (x * scale_) + min_
 
 #' @export
-setMethod("transform_", c("MinMaxScaler", "data.frame"), function(.self, x, f) {
+setMethod("transform_", c("MinMaxScaler", "data.frame"), function(.self, x, f, MoreArgs) {
   x[f] <- mapply(minmax_tf_, x[f], .self$scale_, .self$min_, SIMPLIFY = F)
   x
 })
+
+
+#' @export
+prep_minmax <- function(min, max, cols="numeric") MinMaxScaler(min=min, max=max, cols=cols)
+
+

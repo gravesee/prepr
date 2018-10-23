@@ -39,7 +39,7 @@ setMethod("fit_", c("StandardScaler", "data.frame"), function(.self, x, f, ...) 
 scaler_tf_ <- function(x, mean, scale) (x - mean) / scale
 
 #' @export
-setMethod("transform_", c("StandardScaler", "data.frame"), function(.self, x, f) {
+setMethod("transform_", c("StandardScaler", "data.frame"), function(.self, x, f, MoreArgs) {
   x[f] <- mapply(scaler_tf_, x[f], .self$mean_, .self$scale_, SIMPLIFY = F)
   x
 })

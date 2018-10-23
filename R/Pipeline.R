@@ -3,20 +3,13 @@
 Pipeline <- setRefClass(
   "Pipeline",
   contains = "Transformer",
-  fields = c(transformers="list"),
+  fields = c(transformers="list", schema_="list"),
   methods = list(
     initialize = function(transformers, ...) {
       callSuper(...)
       transformers <<- transformers
-
-      ## apply column filter to all transformers
-      if (!identical(cols, character(0))) {
-        transformers <<- lapply(transformers, function(tf) {
-          tf$cols <- cols
-          tf
-        })
-      }
     },
+    
     show = function(s) {
       callSuper(s="")
       for (tf in transformers) {
@@ -26,32 +19,39 @@ Pipeline <- setRefClass(
     })
   )
 
+
 #' @export
-pipeline <- function(..., cols=character()) {
+setMethod("fit_", c("Pipeline"), function(.self, x, ..., overwrite=FALSE) {
+  if (.self$isfit && !overwrite) stop("pipeline already fit, use overwrite=TRUE to force")
+  
+  ## set the schema
+  .self$schema_ <- lapply(x, schema_)
+  
+  for (tf in .self$transformers) {
+    if (!is(tf, "Sink")) x <- tf$fit_transform(x, ...)
+  }
+})
+
+#' @export
+setMethod("transform_", c("Pipeline"), function(.self, x, f, MoreArgs) {
+  for (tf in .self$transformers) x <- tf$transform(x, MoreArgs=MoreArgs)
+  x
+})
+
+
+#' @export
+pipeline <- function(...) {
   tfs <- list(...)
   stopifnot(all(sapply(tfs, is, "Transformer")))
-  Pipeline(transformers=tfs, cols=cols)
+  Pipeline(transformers=tfs)
 }
 
 #' @export
-setMethod("fit_", c("Pipeline"), function(.self, x, ...) {
-  for (i in seq_along(.self$transformers)) {
-    x <- .self$transformers[[i]]$fit_transform(x, ...)
-  }
-})
+setMethod("%|>%", c("Transformer", "Transformer"), function(lhs, rhs) pipeline(lhs, rhs))
 
 #' @export
-setMethod("transform_", c("Pipeline"), function(.self, x) {
-  for (i in seq_along(.self$transformers)) {
-    x <- .self$transformers[[i]]$transform(x)
-  }
-  x
+setMethod("%|>%", c("Pipeline", "Transformer"), function(lhs, rhs) {
+  lhs$transformers <- c(lhs$transformers, rhs)
+  lhs
 })
 
-#' @export
-setMethod("inverse_transform_", c("Pipeline"), function(.self, x) {
-  for (i in rev(seq_along(.self$transformers))) {
-    x <- .self$transformers[[i]]$inverse_transform(x)
-  }
-  x
-})

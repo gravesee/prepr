@@ -13,11 +13,12 @@ Collate:
     'generics.R'
     'util.R'
     'Transform.R'
-    'FactorImputer.R'
     'Filter.R'
     'MinMaxScaler.R'
+    'NumFactor.R'
     'OnehotEncoder.R'
     'Pipeline.R'
+    'Sink.R'
     'StandardImputer.R'
     'StandardScaler.R'
 RoxygenNote: 6.0.1

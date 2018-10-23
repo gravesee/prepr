@@ -43,9 +43,9 @@ all_found_ <- function(cols, nms) {
 
 filter_cols_ <- function(x, cols) {
   nms <- names(x)
-
+  
   cols <-
-    if (identical(cols, character()))
+    if (identical(cols, "all"))
       nms
     else if (length(cols) > 1)
       all_found_(cols, nms)
@@ -54,6 +54,8 @@ filter_cols_ <- function(x, cols) {
       factor = nms[vapply(x, is.factor, TRUE)],
       numeric = nms[vapply(x, is.numeric, TRUE)],
       all_found_(cols, nms))
+  
+  return(if (identical(cols, character())) NULL else cols)
 }
 
 ##---- Filter helper functions
@@ -62,7 +64,10 @@ is.formula <- function(x) is(x, "formula")
 
 forms <- function(x) base::Filter(is.formula, x)
 
-make_func <- function(text, env=parent.frame()) {
+make_func <- function(text, axis, env=parent.frame()) {
+  
+  if (identical(axis, 1L)) text <- paste0("with(x, ", text, ")")
+  
   eval(
     call("function",
          as.pairlist(list(x=quote(expr =))),
@@ -70,8 +75,8 @@ make_func <- function(text, env=parent.frame()) {
     env=env)
 }
 
-form_to_func <- function(x, env) make_func(as.character(tail(x, 1)), env)
+form_to_func <- function(x, axis, env) make_func(as.character(tail(x, 1)), axis, env)
 
-strip_preds <- function(x, env=parent.frame()) lapply(forms(x), form_to_func, env)
+strip_preds <- function(x, axis=2L, env=parent.frame()) lapply(forms(x), form_to_func, axis, env)
 
 

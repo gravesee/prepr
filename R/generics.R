@@ -4,8 +4,17 @@
 setGeneric("fit_", function(.self, x, f, ...) standardGeneric("fit_"))
 
 #' @export
-setGeneric("transform_", function(.self, x, f, ...) standardGeneric("transform_"))
+setGeneric("transform_", function(.self, x, f, MoreArgs) standardGeneric("transform_"))
 
 #' @export
-setGeneric("inverse_transform_", function(.self, x, f, ...) standardGeneric("inverse_transform_"))
+setGeneric("%|>%", function(lhs, rhs) standardGeneric("%|>%"))
+
+#' @export
+schema_ <- function(x) UseMethod("schema_")
+
+#' @export
+schema_.default <- function(x) list(class=class(x), summary=summary(x))
+
+#' @export
+schema_.factor <- function(x) list(class=class(x), levels=levels(x))
 

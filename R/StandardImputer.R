@@ -1,5 +1,10 @@
 #'@include Transform.R
 
+mode <- function(x, na.rm) {
+  ux <- na.omit(unique(x))
+  ux[which.max(tabulate(match(x, ux)))]
+}
+
 #' @name StandardImputer-class
 #' @title Impute NA Values
 #' @description Replace NA values with calculated values or a constant
@@ -16,36 +21,30 @@
 StandardImputer <- setRefClass(
   "StandardImputer",
   contains = "Transformer",
-  fields = c(method="character", value="numeric", value_="numeric"),
+  fields = c(method="character", value="ANY", value_="ANY"),
   methods = list(
-    initialize = function(method="mean", value=NA_real_, cols="numeric", ...) {
+    initialize = function(method="mean", value=NULL, cols="numeric", ...) {
       stopifnot(is.function(get(method)))
       method <<- method
       value <<- value
-      cols <<- cols
-      allowed_types_ <<- c("integer", "numeric")
-      callSuper(...)
+      callSuper(cols=cols)
     })
 )
 
 #' @export
 setMethod("fit_", c("StandardImputer", "data.frame"), function(.self, x, f, ...) {
-  .self$value_ <- mapply(
-    function(x, method, value) {
-      if (!identical(value, NA_real_))
-        value
-      else
-        do.call(method, list(x, na.rm=TRUE))
-  }, x[f], .self$method, .self$value, SIMPLIFY = TRUE)
+  .self$value_ <- if (!is.null(.self$value)) .self$value else lapply(x[f], .self$method, na.rm=TRUE)
 })
 
+impute_ <- function(x, v) { x[is.na(x)] <- v; x }
 
 #' @export
-setMethod("transform_", c("StandardImputer", "data.frame"), function(.self, x, f) {
-  x[f] <- mapply(
-    function(x, value) {
-      x[is.na(x)] <- value
-      x
-    }, x[f], .self$value_, SIMPLIFY = FALSE)
+setMethod("transform_", c("StandardImputer", "data.frame"), function(.self, x, f, MoreArgs) {
+  x[f] <- mapply(impute_, x[f], .self$value_, SIMPLIFY = FALSE)
   x
 })
+
+#' @export
+prep_impute <- function(method="mean", value=NULL, cols="numeric") {
+  StandardImputer(method=method, value=value, cols=cols)
+}

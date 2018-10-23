@@ -1,37 +1,31 @@
 #'@include Transform.R
 
+check_levels_ <- function(l) {
+  if (is.null(names(l)) || !all(sapply(l, is.character)))
+    stop("Each level must be passed as a named argument with character elements")
+}
+
+
 #' @export OnehotEncoder
 OnehotEncoder <- setRefClass(
   "OnehotEncoder",
   contains = "Transformer",
-  fields = c(levels="list", keep="logical", levels_="list"),
+  fields = c(levels="list", keep="logical", levels_="list", levels_passed_="logical"),
   methods = list(
-    initialize = function(levels=list(), keep=FALSE, cols="factor", ...) {
+    initialize = function(..., keep=FALSE, cols="factor") {
       ## check levels
-      levels <<- levels
+      levels <<- list(...)
+      levels_passed_ <<- FALSE
       keep <<- keep
-      allowed_types_ <<- "factor"
-
+      
       if (!identical(levels, list())) {
-        errs <- list()
-        if (is.null(names(levels)))
-          append(errs, "  levels argument must be a named list")
-
-        if(!all(sapply(levels, is.character)))
-          append(errs, "  levels argument elements must all be character")
-
-        if (!identical(errs, list())) {
-          errs <- c("levels have following errors:", errs)
-          stop(paste0(errs, collapse="\n"))
-        }
-
+        check_levels_(levels)
+        levels_passed_ <<- TRUE
         levels_ <<- levels
-        cols <<- names(levels)
-      } else {
-        cols <<- cols
+        cols <- names(levels)
       }
-
-      callSuper(...)
+      
+      callSuper(allowed_types_="factor", cols=cols)
     })
 )
 
@@ -39,8 +33,7 @@ OnehotEncoder <- setRefClass(
 
 #' @export
 setMethod("fit_", c("OnehotEncoder", "data.frame"), function(.self, x, f, ...) {
-  if (!identical(.self$levels, list())) return()
-  .self$levels_ <- lapply(x[,f,drop=F], levels)
+  if (.self$levels_passed_) return() else .self$levels_ <- lapply(x[,f,drop=F], levels)
 })
 
 #' @param x factor
@@ -54,7 +47,7 @@ onehot_tf_ <- function(x, l) {
 }
 
 #' @export
-setMethod("transform_", c("OnehotEncoder", "data.frame"), function(.self, x, f, ..., y) {
+setMethod("transform_", c("OnehotEncoder", "data.frame"), function(.self, x, f, MoreArgs) {
   inds <- mapply(onehot_tf_, x[f], .self$levels_[f], SIMPLIFY=F)
 
   for (nm in f) {
@@ -70,3 +63,19 @@ setMethod("transform_", c("OnehotEncoder", "data.frame"), function(.self, x, f, 
     cbind(x[-i], inds)
   }
 })
+
+#' Onehot Encoder
+#' 
+#' Encode factor variables to indicator columns
+#' 
+#' @param ... Named arguments where the name maps to variables in the dataset and the argument is
+#' a character vector of levels to create indicator columns
+#' @param keep keep original factors levels after onehot encoding
+#' @param cols character vector of column names to onehot encode. Defaults to all factor columns.
+#' @examples
+#' data(mtcars)
+#' mtcars$cyl <- factor(mtcars$cyl)
+#' prep <- prep_onehot()
+#' prep$fit_transfrom(mtcars)
+#' @export
+prep_onehot <- function(..., keep=FALSE, cols="factor") OnehotEncoder(..., keep=keep, cols=cols)
