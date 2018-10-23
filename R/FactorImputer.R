@@ -43,8 +43,3 @@ setMethod("transform_", c("FactorImputer", "data.frame"), function(.self, x, f, 
   x[f] <- mapply(function(z, v) v[z], x[f], .self$values_, SIMPLIFY=F)
   x
 })
-
-#' @export
-setMethod("inverse_transform_", c("FactorImputer"), function(.self, x) {
-  stop("Inverse not valid -- FactorImputer")
-})

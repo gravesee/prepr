@@ -23,12 +23,8 @@ Pipeline <- setRefClass(
         cat("\n")
         tf$show(s="  ")
       }
-      
-    }
-    
-    
-    )
-)
+    })
+  )
 
 #' @export
 pipeline <- function(..., cols=character()) {

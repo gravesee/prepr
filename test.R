@@ -1,6 +1,18 @@
 ## Create a
 data(titanic, package="onyx")
 
+data(mtcars)
+
+mtcars$cyl <- factor(mtcars$cyl)
+
+sf <- StandardFilter(~sum(is.na(x)) > 10, cols=c("mpg","hp"))
+sf$fit(mtcars)
+sf$transform(mtcars)
+
+ff <- FactorFilter(~all(table(x) > 20))
+ff$fit(mtcars)
+ff$transform(mtcars)
+
 oh <- OnehotEncoder(levels=list(Sex=c("male"), Pclass=c("1", "3")))
 oh$fit(titanic)
 head(oh$transform(titanic))
@@ -12,11 +24,20 @@ p <- pipeline(
   StandardScaler(),
   StandardImputer(method="median"),
   MinMaxScaler(feature_range = c(-1, 1)),
-  OnehotEncoder(levels=list(Sex="male"), keep=TRUE),
-  FactorImputer(method="mean", cols=c("sex", "Embarked", "Pclass"))
-)
+  OnehotEncoder(),
+  StandardFilter(predicates=list(function(x) max(x) > 1)))
+
+p$fit(mtcars)
+p$transform(mtcars)
+
+q <- p
+q$transformers <- head(q$transformers, -1)
+q$transform(mtcars)
 
 ## Fix reporting of column errors -- requested columns not found in x
+
+
+
 
 
 p$fit(titanic[-1], y=titanic$Survived)
@@ -75,4 +96,8 @@ p$inverse_transform(z)
 z2 <- p$fit_transform(z1)
 z3 <- p$inverse_transform(z2)
 all.equal(z1, z3)
+
+
+
+
 

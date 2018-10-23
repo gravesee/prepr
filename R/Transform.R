@@ -15,11 +15,11 @@ setRefClass(
       cols <<- filter_cols_(x, cols)
     },
     fit = function(x, ...) {
-      filter(x) 
-      if (identical(length(cols), 0L)) return(x)
+      on.exit(isfit <<- TRUE)
+      filter(x)
+      if (identical(length(cols), 0L)) return()
       checktypes(x, cols, allowed_types_, .self)
       fit_(.self, x, f=cols, ...)
-      isfit <<- TRUE
     },
     transform = function(x) {
       stopifnot(isfit)
@@ -29,11 +29,6 @@ setRefClass(
     fit_transform = function(x, ...) {
       fit(x, ...)
       transform(x)
-    },
-    inverse_transform = function(x) {
-      stopifnot(isfit)
-      checktypes(x, filter(x), allowed_types_, .self)
-      inverse_transform_(.self, x, f=cols)
     },
     show = function(s="") {
       cat(sprintf("%s%s", s, .self$getRefClass()@className))

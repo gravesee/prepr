@@ -19,7 +19,7 @@ StandardScaler <-setRefClass(
       callSuper(s)
       if (isfit)
         cat(sprintf("\n%swith_mean: %s, with_std: %s", extend_(s), with_mean, with_std))
-      
+
     })
 )
 
@@ -41,14 +41,5 @@ scaler_tf_ <- function(x, mean, scale) (x - mean) / scale
 #' @export
 setMethod("transform_", c("StandardScaler", "data.frame"), function(.self, x, f) {
   x[f] <- mapply(scaler_tf_, x[f], .self$mean_, .self$scale_, SIMPLIFY = F)
-  x
-})
-
-##--- Inverse transform
-scaler_inv_tf_ <- function(x, mean, scale)  x * scale + mean
-
-#' @export
-setMethod("inverse_transform_", c("StandardScaler", "data.frame"), function(.self, x, f) {
-  x[f] <- mapply(scaler_inv_tf_, x[f], .self$mean_, .self$scale_, SIMPLIFY = FALSE)
   x
 })

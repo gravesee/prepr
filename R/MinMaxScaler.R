@@ -38,12 +38,3 @@ setMethod("transform_", c("MinMaxScaler", "data.frame"), function(.self, x, f) {
   x[f] <- mapply(minmax_tf_, x[f], .self$scale_, .self$min_, SIMPLIFY = F)
   x
 })
-
-minmax_invtf_ <- function(x, scale_, min_) (x - min_) / scale_
-
-#' @export
-setMethod("inverse_transform_", c("MinMaxScaler", "data.frame"), function(.self, x, f) {
-  x[f] <- mapply(minmax_invtf_, x[f],
-                .self$scale_, .self$min_, SIMPLIFY = FALSE)
-  x
-})

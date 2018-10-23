@@ -49,8 +49,3 @@ setMethod("transform_", c("StandardImputer", "data.frame"), function(.self, x, f
     }, x[f], .self$value_, SIMPLIFY = FALSE)
   x
 })
-
-#' @export
-setMethod("inverse_transform_", c("StandardImputer"), function(.self, x, f) {
-  stop("Inverse not valid -- StandardImputer")
-})

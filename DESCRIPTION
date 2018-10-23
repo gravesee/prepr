@@ -14,6 +14,7 @@ Collate:
     'util.R'
     'Transform.R'
     'FactorImputer.R'
+    'Filter.R'
     'MinMaxScaler.R'
     'OnehotEncoder.R'
     'Pipeline.R'
