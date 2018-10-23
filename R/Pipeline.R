@@ -3,9 +3,10 @@
 Pipeline <- setRefClass(
   "Pipeline",
   contains = "Transformer",
-  fields = c(transformers="list", schema_="list"),
+  fields = c(transformers="list", schema_="list", perf_="ANY"),
   methods = list(
-    initialize = function(transformers, ...) {
+    initialize = function(transformers, perf=NULL, ...) {
+      perf_ <<- perf
       callSuper(...)
       transformers <<- transformers
     },
@@ -28,7 +29,7 @@ setMethod("fit_", c("Pipeline"), function(.self, x, ..., overwrite=FALSE) {
   .self$schema_ <- lapply(x, schema_)
   
   for (tf in .self$transformers) {
-    if (!is(tf, "Sink")) x <- tf$fit_transform(x, ...)
+    if (!is(tf, "Sink")) x <- tf$fit_transform(x, perf=.self$perf_, ...)
   }
 })
 
@@ -40,10 +41,11 @@ setMethod("transform_", c("Pipeline"), function(.self, x, f, MoreArgs) {
 
 
 #' @export
-pipeline <- function(...) {
+pipeline <- function(formula, data, ...) {
+  f <- strip_formula_(formula, data)
   tfs <- list(...)
   stopifnot(all(sapply(tfs, is, "Transformer")))
-  Pipeline(transformers=tfs)
+  Pipeline(transformers=tfs, cols=f$cols, perf=f$perf)
 }
 
 #' @export

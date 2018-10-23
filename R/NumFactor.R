@@ -11,14 +11,13 @@ woe <- function(x, y, eps = 1e-5) {
 NumFactor <- setRefClass(
   "NumFactor",
   contains = "Transformer",
-  fields = c(method="character", values_="vector", values_passed_="logical", y_="ANY"),
+  fields = c(method="character", values_="vector", values_passed_="logical"),
   methods = list(
-    initialize = function(..., method="mean", cols="factor", y=NULL) {
+    initialize = function(..., method="mean", cols="factor") {
       values <- list(...)
-      y_ <<- y
       method <<- method
       
-      cols <<- if (is.null(y) && length(values) == 0L) NULL else cols
+      cols <<- if (length(values) == 0L) NULL else cols
       values_passed_ <<- FALSE
       
       if(length(values) > 0L) {
@@ -44,8 +43,8 @@ FactorImputer_fit_ <- function(x, method, values, y){
 }
 
 #' @export
-setMethod("fit_", c("NumFactor", "data.frame"), function(.self, x, f, ...) {
-  y <- eval(.self$y_, x)
+setMethod("fit_", c("NumFactor", "data.frame"), function(.self, x, f, perf, ...) {
+  y <- eval(perf, x)
   if (!.self$values_passed_)
     .self$values_ <- lapply(x[,f,drop=F], FactorImputer_fit_, .self$method, .self$values[f], y)
 })
@@ -58,8 +57,8 @@ setMethod("transform_", c("NumFactor", "data.frame"), function(.self, x, f, More
 })
 
 #' @export
-prep_numfactor <- function(..., method="mean", y=NULL, cols="factor") {
-  NumFactor(..., method=method, y=as.list(match.call())$y, cols=cols)
+prep_numfactor <- function(..., method="mean", cols="factor") {
+  NumFactor(..., method=method, cols=cols)
 }
 
 

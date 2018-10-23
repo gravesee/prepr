@@ -79,4 +79,14 @@ form_to_func <- function(x, axis, env) make_func(as.character(tail(x, 1)), axis,
 
 strip_preds <- function(x, axis=2L, env=parent.frame()) lapply(forms(x), form_to_func, axis, env)
 
-
+## functions for working with formulae
+strip_formula_ <- function(f, data) {
+  tms <- terms(f, data=data)  
+  vars <- sapply(attr(tms, "variables"), as.character)[-1]
+  resp <- attr(tms, "response")
+  
+  list(
+    perf = if (resp > 0) as.name(vars[[resp]]) else NULL,
+    cols = if (resp > 0) vars[-resp] else vars
+  )
+}
