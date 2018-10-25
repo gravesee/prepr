@@ -1,59 +1,65 @@
-#' @include Transform.R
+ #' @include Transform.R
 
 Pipeline <- setRefClass(
   "Pipeline",
   contains = "Transformer",
-  fields = c(transformers="list", schema_="list", perf_="ANY"),
+  fields = c(tfs="list"),
   methods = list(
-    initialize = function(transformers, perf=NULL, ...) {
-      perf_ <<- perf
-      callSuper(...)
-      transformers <<- transformers
+    initialize = function(f=~., ...) {
+      callSuper(f=f)
+      tfs <<- list(...)
     },
-    
-    show = function(s) {
-      callSuper(s="")
-      for (tf in transformers) {
-        cat("\n")
-        tf$show(s="  ")
+
+    fit = function(x, ...) {
+      callSuper(x)
+      for (tf in tfs) {
+        x <- tf$fit_transform(x, ...)
       }
-    })
+    },
+
+    transform = function(x) {
+      for (tf in tfs) {
+        x <- tf$transform(x)
+      }
+      x
+    },
+
+    fit_transform = function(x, ...) {
+      for (tf in tfs) {
+        x <- tf$fit_transform(x, ...)
+      }
+      x
+    }
   )
-
-
-#' @export
-setMethod("fit_", c("Pipeline"), function(.self, x, ..., overwrite=FALSE) {
-  if (.self$isfit && !overwrite) stop("pipeline already fit, use overwrite=TRUE to force")
-  
-  ## set the schema
-  .self$schema_ <- lapply(x, schema_)
-  
-  for (tf in .self$transformers) {
-    if (!is(tf, "Sink")) x <- tf$fit_transform(x, perf=.self$perf_, ...)
-  }
-})
+)
 
 #' @export
-setMethod("transform_", c("Pipeline"), function(.self, x, f, MoreArgs) {
-  for (tf in .self$transformers) x <- tf$transform(x, MoreArgs=MoreArgs)
-  x
-})
-
+pipeline <- function(..., f=~.) Pipeline(..., f=f)
 
 #' @export
-pipeline <- function(formula, data, ...) {
-  f <- strip_formula_(formula, data)
-  tfs <- list(...)
-  stopifnot(all(sapply(tfs, is, "Transformer")))
-  Pipeline(transformers=tfs, cols=f$cols, perf=f$perf)
-}
+setGeneric("%|>%", function(lhs, rhs) standardGeneric("%|>%"))
 
 #' @export
 setMethod("%|>%", c("Transformer", "Transformer"), function(lhs, rhs) pipeline(lhs, rhs))
 
 #' @export
 setMethod("%|>%", c("Pipeline", "Transformer"), function(lhs, rhs) {
-  lhs$transformers <- c(lhs$transformers, rhs)
+  lhs$tfs <- append(lhs$tfs, rhs)
   lhs
+})
+
+#' @export
+setMethod("%|>%", c("Pipeline", "Pipeline"), function(lhs, rhs) {
+  lhs$tfs <- append(lhs$tfs, rhs$tfs)
+  lhs
+})
+
+#' @export
+setMethod("show", "Pipeline", function(object) {
+  cat("[", object$getClass()@className, "] [isfit: ", if (object$isfit) "yes" else "no", "]")
+  for (tf in object$tfs) {
+    cat("\n|--")
+    show(tf)
+  }
 })
 

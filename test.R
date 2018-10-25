@@ -1,59 +1,41 @@
-## Create a
-data(titanic, package="onyx")
-
-data(mtcars)
-mtcars$cyl <- factor(mtcars$cyl)
 
 
-## TODO:: Pass columns from pipeline to transformers and take intersection
+p <- pipeline(prep_onehot(~Species))
+
 
 p <- pipeline(
-  Survived~., data=titanic,
-  prep_filter(~is.na(Age), axis=1L),
-  prep_numfactor(method="mean"),
-  prep_minmax(min=-1, max=1)) ## Fix this error, too
+  prep_impute(),
+  prep_onehot(~sel_lambda(function(x) sum(x) < 20)),
+  prep_binarize(~cyl, levels=1, replace = NA))
+
+p$fit(mtcars)
 
 
-p$fit(titanic)
-
-p$transform(titanic)
-
-p <- prep_filter(~is.na(Age), axis=1L)
-
-x <- formula(Survived~., data=titanic) %|>% prep_filter(~is.na(Age), axis=1L)
+p <- prep_onehot(~sel_lambda(function(x) sum(x) < 20))
 
 
-¶
-
-p$fit(titanic, overwrite=TRUE, y=titanic$Survived)
-
-
-p$transform(titanic[-1])
-
-prep_filter(~is.na(Age), axis=1L)
-fit(titanic[-1])
-
-p2 <- prep_numfactor(method="woe", y=Survived) %|>% prep_onehot()
-p2$fit(titanic)
-
-
-p3 <- p1 %|>% p2
-
-p3$isfit <- TRUE
-p3$transform(titanic[-1])
-
-
-p$fit(titanic, overwrite=TRUE)
-
-x <- p$transform(titanic)
+p <-
+  prep_impute() %|>%
+  prep_onehot(~cyl) %|>%
+  prep_binarize(~vs, levels=1, replace = NA)  %|>%
+  prep_impute(~vs, method=max)
 
 
 
+mtcars$mpg[1:10] <- NA
+mtcars$cyl[20:30] <- NA
 
 
-library(magrittr)
+#p <- prep_onehot(~cyl)
+p <- prep_impute()
+p$fit_transform(x=mtcars)
 
-p$transform(titanic) %>% as.matrix %>% xgboost::xgb.DMatrix(label=titanic$Survived)
 
 
-p$transform(mtcars)
+p <- prep_onehot(~cyl)
+p$fit_transform(mtcars)
+
+p <- pipeline(prep_impute(), prep_onehot(~cyl))
+p <- pipeline(prep_onehot(~cyl), prep_impute())
+
+match(mtcars$cyl, unique(mtcars$cyl), nomatch = 0)

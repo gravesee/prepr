@@ -9,16 +9,12 @@ Description: Specify data transformation workflows and record the steps
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
-Collate: 
-    'generics.R'
-    'util.R'
-    'Transform.R'
-    'Filter.R'
-    'MinMaxScaler.R'
-    'NumFactor.R'
-    'OnehotEncoder.R'
-    'Pipeline.R'
-    'Sink.R'
-    'StandardImputer.R'
-    'StandardScaler.R'
 RoxygenNote: 6.0.1
+Suggests: testthat
+Collate: 
+    'Transform.R'
+    'OnehotEncoder.R'
+    'LevelBinarizer.R'
+    'NAImputer.R'
+    'Pipeline.R'
+    'formula.R'
