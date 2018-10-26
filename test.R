@@ -4,12 +4,12 @@ p <- pipeline(prep_onehot(~Species))
 
 
 p <- pipeline(
-  prep_impute(),
-  prep_onehot(~sel_lambda(function(x) sum(x) < 20)),
-  prep_binarize(~cyl, levels=1, replace = NA))
+  prep_binarize(~cyl, levels=8, replace = NA),
+  prep_substitute(mpg~vs+am+gear, method=median),
+  prep_impute(~cyl, method = median))
 
 p$fit(mtcars)
-
+p$transform(mtcars)
 
 p <- prep_onehot(~sel_lambda(function(x) sum(x) < 20))
 
