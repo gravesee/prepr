@@ -7,7 +7,6 @@ output: md_document
 
 ```{r setup, include=FALSE}
 library(prepr)
-data(titanic, package="onyx")
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
@@ -17,50 +16,47 @@ This package is used to temporarily relieve swelling, burning, pain, and itching
 implement the Transformer API and allow for pipelines that can be saved and applied to 
 new datasets.
 
-It will eventually include methods for outputting to PMML or json to assist with productionalizing data preparation steps.
+### Isn't there already a package that does this?
 
-```{r Fit & Transform}
+Yes, and it's pretty comprehensive. Check out the `recipes` package here: https://tidymodels.github.io/recipes/ . So why reinvent the wheel? Well I am not a huge fan of the tidyverse. I like that it turns new users on to R and the folks at RStudio have done so much for the R community. The tidyverse is very opinionated and still evolving. I prefer to stick to base R when I can and I especially like understanding how things work under the hood. Hence this package.
 
-## create a onehot encoder
-oh <- OnehotEncoder(levels=list(Sex="male", Pclass=c("1", "3")))
+## Prep Functions
 
-## fit the scaler using a data.frame
-oh$fit(titanic)
+Processing pipelines are nothing new. So it's no suprise that this package follows a similar approach. You can create a pipeline explicitly using the `pipeline` function or in a `maggritr` style by using the pipeline operator, `%|>%`, to pipe multiple prep functions into each other.
 
-## transform each column of data.frame 
-knitr::kable(head(oh$transform(head(titanic))), caption = "Transformed Data")
+```{r prep}
+data(iris)
+
+p1 <- pipeline(
+  prep_minmax(~.-Species),
+  prep_onehot(~sel_factor()),
+  sink_matrix()
+)
+
+p2 <-
+  prep_minmax(~.-Species) %|>%
+  prep_onehot(~sel_factor()) %|>%
+  sink_matrix()
+
+all.equal(p1, p2)
+
+## print out
+p1
 ```
+## Fitting
 
-## Specify Subset of Columns
+The purpose of creating these pipelines is to fit them to data and save them to apply on different datasets. The fit method is used to fit a pipeline. It works by fitting each transform in sequence and passing the transformed data down the pipe. Once it has been trained, the `isfit` member will be set to `TRUE`
 
-All transformers take a `cols` argument. It can be a character vector of column name which limits the transformer operations to just those columns. Optionally, "factor" or "numeric" can be specified to limit opertions to just columns of those types. Most transformers have a default value for the `cols` argument that makes sense for the operation.
-
-```{r Filter Columns}
-
-mm <- MinMaxScaler(feature_range=c(-1, 1), cols=c("disp", "hp", "wt"))
-z <- mm$fit_transform(mtcars)
-
-## only specified columns are transformed
-knitr::kable(sapply(z, range), caption="Ranges of Columns")
+```{r fitting}
+p1$fit(iris)
+p1
 ```
+## Transforming
 
-### Pipelines
+Once a pipeline has been fit, the transform method can be called and passed a new dataset. The settings saved during the training process will be applied to the new dataset ensuring a reproducible workflow with little micromanagement.
 
-Pipelines simply chain together transformers in a list. They implement the Transformer API as well and support the same methods. Columns can also have an optional `cols` argument that will limit all pipeline operations to the columns specified.
-
-```{r Pipelines}
-## chain together in a pipeline
-p <- pipeline(
-  MinMaxScaler(feature_range=c(-1, 1)),
-  StandardImputer(method="median"),
-  OnehotEncoder(levels=list(Sex="male", Pclass=c("1", "3"))),
-  OnehotEncoder()) ## The rest
-
-z <- p$fit_transform(titanic[-1])
-
-knitr::kable(head(z), caption="Pipeline Output")
+```{r transform}
+z <- p1$transform(iris)
+knitr::kable(head(z), digits = 2)
 ```
-
-Note that the order of the pipeline transformers is important. If you pass numeric transformers after onehot encoders for example, the onehot output will be transformed as it is now numeric. As of yet there is no mechanism for preventing this from happening or warning the user.
-
 

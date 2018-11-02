@@ -18,5 +18,6 @@ Collate:
     'MinMaxScaler.R'
     'NAImputer.R'
     'Pipeline.R'
+    'Sink.R'
     'Substituter.R'
     'formula.R'

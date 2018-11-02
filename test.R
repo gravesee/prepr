@@ -3,6 +3,7 @@
 p <- pipeline(prep_onehot(~Species))
 
 
+
 p <- pipeline(
   prep_binarize(~cyl, levels=8, replace = NA),
   prep_substitute(mpg~vs+am+gear, method=median),
@@ -16,9 +17,9 @@ p <- prep_onehot(~sel_lambda(function(x) sum(x) < 20))
 
 p <-
   prep_impute() %|>%
-  prep_onehot(~cyl) %|>%
-  prep_binarize(~vs, levels=1, replace = NA)  %|>%
-  prep_impute(~vs, method=max)
+  prep_onehot(~cyl+vs+gear) %|>%
+  prep_substitute(mpg~carb, method=mean) %|>%
+  sink_sparse(~sel_regex("=")+carb)
 
 
 

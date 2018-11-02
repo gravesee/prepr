@@ -8,13 +8,16 @@ onehot_tf_ <- function(x, l) {
   data.frame(m, check.names = FALSE)
 }
 
+#' @export
 onehot_fit_ <- function(x) UseMethod("onehot_fit_")
 
+#' @export
 onehot_fit_.default <- function(x) {
   warning("creating onehot encoding for non-factor", call. = F)
   unique(x)
 }
 
+#' @export
 onehot_fit_.factor <- function(x) levels(x)
 
 

@@ -30,7 +30,7 @@ form_calls <- function(tm, i) {
 sub_terms <- function(d, i) setdiff(which(d == 0), i)
 add_terms <- function(d, i) setdiff(which(d > 0), i)
 filter_call <- function(exprs, i) unlist(Filter(is.call, exprs[i]))
-filter_vars <- function(exprs, i) unlist(as.character(Filter(is.name, exprs[i])))
+filter_vars <- function(exprs, i) unlist(sapply(Filter(is.name, exprs[i]), deparse))
 
 #' @title Parse Formula for Variable Specification
 #' @param f A formula specifying how variables should be treated.
@@ -51,7 +51,7 @@ form_parts <- function(f, data) {
   dirs <- rowSums(factors)
 
   i <- attr(tm, "response")
-  v <- unlist(as.character(exprs))
+  v <- sapply(exprs, deparse)
 
   ## store all of the indices in own vars
   list(
@@ -76,16 +76,19 @@ cols_filter <- function(what, env) {
 #' @name sel_factor
 #' @title Select Factor Columns
 #' @rdname column-selectors
+#' @export
 sel_factor <- function()  cols_filter("factor", parent.frame())
 
 #' @name sel_numeric
 #' @title Select Numeric Columns
 #' @rdname column-selectors
+#' @export
 sel_numeric <- function() cols_filter(c("numeric", "integer"), parent.frame())
 
 #' @name sel_regex
 #' @title Select Columns by Regex
 #' @rdname  column-selectors
+#' @export
 sel_regex <- function(regex) {
   x <- names(parent.frame())
   grep(pattern = regex, x, value = TRUE)
